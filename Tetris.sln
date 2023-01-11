@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tetris.Blazor.Server", "Tetris.Blazor\Server\Tetris.Blazor.Server.csproj", "{0A65EA93-C106-4919-9611-0874B0566120}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tetris.Blazor.Shared", "Tetris.Blazor\Shared\Tetris.Blazor.Shared.csproj", "{A671BBDD-7FC6-441C-8C8A-24F4CC3CA167}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tetris.Blazor.Client", "Tetris.Blazor\Client\Tetris.Blazor.Client.csproj", "{4785A965-BA19-4E0E-9D53-AC8A9DC9ED8A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A65EA93-C106-4919-9611-0874B0566120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A65EA93-C106-4919-9611-0874B0566120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A65EA93-C106-4919-9611-0874B0566120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A65EA93-C106-4919-9611-0874B0566120}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A671BBDD-7FC6-441C-8C8A-24F4CC3CA167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A671BBDD-7FC6-441C-8C8A-24F4CC3CA167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A671BBDD-7FC6-441C-8C8A-24F4CC3CA167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A671BBDD-7FC6-441C-8C8A-24F4CC3CA167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4785A965-BA19-4E0E-9D53-AC8A9DC9ED8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4785A965-BA19-4E0E-9D53-AC8A9DC9ED8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4785A965-BA19-4E0E-9D53-AC8A9DC9ED8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4785A965-BA19-4E0E-9D53-AC8A9DC9ED8A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {261E4CF4-FD00-44CD-8FF4-4C723F6EC657}
+	EndGlobalSection
+EndGlobal

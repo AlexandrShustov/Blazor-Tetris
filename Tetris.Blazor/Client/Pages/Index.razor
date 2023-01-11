@@ -1,0 +1,62 @@
+﻿@page "/"
+@using Tetris.Blazor.Shared.Entities
+
+@if (IsGameOver)
+{
+  <div>
+    <h1>Game over</h1>
+  </div>
+}
+
+<div tabindex="0" class="row h-100 w-100" @onkeydown="HandleInput" @ref="_container">
+  <div class="d-flex flex-column">
+    <div class="game-field">
+      @if (_game is null)
+      {
+        <div>
+          Loading...
+        </div>
+      }
+      else
+      {
+        @foreach (var cell in _game.Field.Iterate())
+        {
+          <div @key="new {cell.Position.X, cell.Position.Y}" class="cell @(cell.State == State.Filled ? "filled-cell" : "")">
+          </div>
+        }
+      }
+    </div>
+    <div>
+      Score: @(_game?.Score ?? 0)
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private Game? _game;
+  private ElementReference _container;
+  public bool IsGameOver = false;
+
+  protected override void OnInitialized()
+  {
+    _game = new Game();
+    _game.Updated += StateHasChanged;
+    _game.GameOver += ShowGameOver;
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await _container.FocusAsync(true);
+  }
+
+  private void HandleInput(KeyboardEventArgs args)
+  {
+    _game?.HandleInput(args.Key);
+  }
+
+  private void ShowGameOver()
+  {
+    IsGameOver = true;
+  }
+}

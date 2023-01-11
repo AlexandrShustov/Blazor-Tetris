@@ -1,0 +1,19 @@
+﻿.game-field {
+  display: grid;
+  grid-template-columns: repeat(10, 0fr);
+  width: 20vw;
+  height: 40vw;
+}
+
+.cell {
+  background-color: cadetblue;
+  width: 2vw;
+  height: 2vw;
+  border-width: thin;
+  border-style: solid;
+  border-color: darkcyan;
+}
+
+.filled-cell {
+  background-color: chocolate;
+}
