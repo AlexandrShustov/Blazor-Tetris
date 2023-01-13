@@ -1,0 +1,46 @@
+﻿.background {
+  background-image: linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+  min-width: 100vw;
+  min-height: 100vh;
+}
+
+.header-bg {
+  width: 100vw;
+  height: 50vh;
+  margin-bottom: 2vh;
+}
+
+.hello-container {
+  height: 30vh;
+}
+
+.play-button {
+  width: 15vw;
+  height: 6vh;
+  background-color: #FF719A;
+  margin-top: 5vh;
+  color: #f2e9ea;
+  font-size: x-large;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+
+  .play-button:hover {
+    background-color: #FFA99F;
+    color: white;
+  }
+
+h1 {
+  background-image: linear-gradient(-225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h3 {
+  background-image: linear-gradient(60deg, #29323c 0%, #485563 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-link {
+  color: rgb(41, 50, 60);
+}

@@ -15,4 +15,12 @@
     <ProjectReference Include="..\Shared\Tetris.Blazor.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\Home.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\Home.razor" />
+  </ItemGroup>
+
 </Project>

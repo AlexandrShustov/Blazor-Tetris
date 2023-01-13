@@ -1,15 +1,8 @@
-﻿@page "/"
+﻿@page "/play"
 @using Tetris.Blazor.Shared.Entities
 
-@if (IsGameOver)
-{
-  <div>
-    <h1>Game over</h1>
-  </div>
-}
-
 <div tabindex="0" class="row h-100 w-100" @onkeydown="HandleInput" @ref="_container">
-  <div class="d-flex flex-column">
+  <div class="d-flex flex-row align-items-center justify-content-center">
     <div class="game-field">
       @if (_game is null)
       {
@@ -26,8 +19,8 @@
         }
       }
     </div>
-    <div>
-      Score: @(_game?.Score ?? 0)
+    <div class="align-self-start">
+      <p>Score: @(_game?.Score ?? 0)</p>
     </div>
   </div>
 </div>

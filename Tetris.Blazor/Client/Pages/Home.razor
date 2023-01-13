@@ -1,0 +1,43 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+
+<div class="background">
+  <div class="container-fluid d-flex flex-column min-vh-100">
+    <div class="row">
+      <ul class="nav justify-content-center mt-2">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Leaders</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="row d-flex justify-content-center m-auto">
+      <div class="d-flex flex-column justify-content-between hello-container">
+
+        <div class="d-flex flex-column">
+          <h1 class="align-self-center mb-0 fw-bold text display-1">
+            Tetris
+          </h1>
+
+          <h6 class="align-self-center text-muted mt-1">
+            just to test out Blazor
+          </h6>
+        </div>
+
+        <button @onclick="GoToGame" class="btn play-button align-self-center">Play</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+
+  private void GoToGame()
+  {
+    Navigation.NavigateTo("/play");
+  }
+
+}
