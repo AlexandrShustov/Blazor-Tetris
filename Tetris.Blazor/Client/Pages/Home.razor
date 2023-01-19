@@ -1,35 +1,31 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
 
-<div class="background">
-  <div class="container-fluid d-flex flex-column min-vh-100">
-    <div class="row">
-      <ul class="nav justify-content-center mt-2">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Leaders</a>
-        </li>
-      </ul>
-    </div>
+<div class="background d-flex flex-column align-items-center">
+  <div class="flex-bar">
+    <MudStack Justify="Justify.Center" Row="true">
+      <MudButton Variant="Variant.Text" Color="Color.Secondary">Home</MudButton>
+      <MudButton Variant="Variant.Text" Color="Color.Primary">Leaders</MudButton>
+    </MudStack>
+  </div>
 
-    <div class="row d-flex justify-content-center m-auto">
-      <div class="d-flex flex-column justify-content-between hello-container">
+  <div class="d-flex flex-column justify-content-center flex-content">
+    <MudText Typo="Typo.h1" Class="fw-bold" Color="Color.Primary" Align="Align.Center">
+      Tetris
+    </MudText>
 
-        <div class="d-flex flex-column">
-          <h1 class="align-self-center mb-0 fw-bold text display-1">
-            Tetris
-          </h1>
-
-          <h6 class="align-self-center text-muted mt-1">
-            just to test out Blazor
-          </h6>
-        </div>
-
-        <button @onclick="GoToGame" class="btn play-button align-self-center">Play</button>
-      </div>
-    </div>
+    <MudText Typo="Typo.h5" Color="Color.Secondary" Align="Align.Center">
+      It's a simple app built with 
+      <MudText Color="Color.Primary" Inline="true" GutterBottom="true" Typo="Typo.inherit">Blazor</MudText>
+      <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Primary" Title="Favorite" />
+    </MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               FullWidth="false" Size="Size.Large"
+               DisableElevation="true"
+               Class="align-self-center mt-5"
+               OnClick="GoToGame">
+      Play
+    </MudButton>
   </div>
 </div>
 
@@ -39,5 +35,4 @@
   {
     Navigation.NavigateTo("/play");
   }
-
 }

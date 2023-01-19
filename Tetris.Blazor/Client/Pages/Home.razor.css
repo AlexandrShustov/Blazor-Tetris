@@ -41,6 +41,16 @@ h3 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.nav-link {
-  color: rgb(41, 50, 60);
+
+.flex-bar {
+  flex: 0 0 5vh;
+}
+
+.flex-content {
+  flex: 1 0 100%;
+}
+
+.blazor-paper {
+  color: #D4616C;
+  border-radius: 4px;
 }

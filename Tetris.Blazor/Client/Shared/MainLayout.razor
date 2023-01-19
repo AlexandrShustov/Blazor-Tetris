@@ -1,9 +1,25 @@
-﻿@inherits LayoutComponentBase
+﻿@using MudBlazor.Utilities
+@inherits LayoutComponentBase
 
-<div>
-  <main>
-    <div>
-      @Body
-    </div>
-  </main>
-</div>
+<MudThemeProvider Theme="MyTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+  @Body
+</MudLayout>
+
+@code {
+
+  readonly MudTheme MyTheme = new MudTheme()
+    {
+      Palette = new Palette()
+      {
+        Primary = "#D4616C",
+        Secondary = "#3C596F",
+        TextPrimary = "#D4616C",
+        TextSecondary = "#1f1f1f"
+      }
+    };
+
+}
