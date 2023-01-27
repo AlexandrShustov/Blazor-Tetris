@@ -10,15 +10,15 @@ public class Game
   public event Action GameOver;
   public Field Field { get; }
 
-  private Timer _timer;
-  private long _interval = 550;
+  private readonly Timer _timer;
+  private long _interval;
   private TimeSpan _gameSpeed;
   private DateTime _lastUpdateTime = DateTime.MinValue;
 
   private int _score = 0;
 
-  private Random _random = new Random();
-  private List<Func<Figure>> _pool;
+  private readonly Random _random = new Random();
+  private readonly List<Func<Figure>> _pool;
 
   public int Score
   {
@@ -58,36 +58,48 @@ public class Game
   {
     var now = DateTime.UtcNow;
 
+    CheckForGameOver();
+    CheckRowsToEliminate();
+
     var delta = now - _lastUpdateTime;
     if (delta < _gameSpeed)
       return;
 
-    RefreshState();
+    MoveDown();
 
     Updated?.Invoke();
     _lastUpdateTime = now;
   }
 
-  private void RefreshState()
+  private void CheckRowsToEliminate()
   {
-    if (Field.GetRow(3).Any(x => !x.IsFreeFor(_currentFigure)))
-    {
-      GameOver?.Invoke();
-      _timer.Enabled = false;
-      _currentFigure = null;
-    }
+    if (_currentFigure == null || !IsLanded(_currentFigure))
+      return;
 
+    _currentFigure = Instantiate();
+
+    var eliminated = EliminateFullRows();
+    Score += eliminated.Length;
+    _interval -= eliminated.Length * 10;
+    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+  }
+
+  private void CheckForGameOver()
+  {
+    if (!Field.GetRow(3).Any(x => !x.IsFreeFor(_currentFigure)))
+      return;
+
+    GameOver?.Invoke();
+    _timer.Enabled = false;
+    _currentFigure = null;
+  }
+
+  private void MoveDown()
+  {
     if (_currentFigure is not null)
       PerformMovement(MoveType.Down);
     else
       _currentFigure = Instantiate();
-
-    var eliminated = EliminateFullRows();
-
-    Score += eliminated.Length;
-
-    _interval -= eliminated.Length * 10;
-    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
   }
 
   private int[] EliminateFullRows()
@@ -126,9 +138,6 @@ public class Game
 
     if (nextPos is { Length:>0 })
       ApplyPosition(figure, nextPos);
-
-    if (IsLanded(figure))
-      _currentFigure = Instantiate();
   }
 
   private Position[] GroundPosition(Figure figure)
