@@ -82,6 +82,7 @@ public class Game
     Score += eliminated.Length;
     _interval -= eliminated.Length * 10;
     _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+    Updated?.Invoke();
   }
 
   private void CheckForGameOver()
