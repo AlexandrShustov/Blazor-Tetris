@@ -1,0 +1,59 @@
+﻿@page "/play"
+@using Tetris.Blazor.Shared.Entities
+
+<div class="d-flex flex-column">
+  <div class="game-container">
+    <div tabindex="0" class="row h-100 w-100" @onkeydown="HandleInput" @ref="_container">
+      <div class="d-flex flex-row align-items-center justify-content-center">
+        <div class="game-field">
+          @if (_game is null)
+          {
+            <div>
+              <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="my-7" />
+            </div>
+          }
+          else
+          {
+            @foreach (var cell in _game.Field.Iterate())
+            {
+              <div @key="new {cell.Position.X, cell.Position.Y}" class="cell @(cell.State == State.Filled ? "filled-cell" : "")">
+              </div>
+            }
+          }
+        </div>
+        <div class="align-self-start">
+          <p>Score: @(_game?.Score ?? 0)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private Game? _game;
+  private ElementReference _container;
+  public bool IsGameOver = false;
+
+  protected override void OnInitialized()
+  {
+    _game = new Game();
+    _game.Updated += StateHasChanged;
+    _game.GameOver += ShowGameOver;
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await _container.FocusAsync(true);
+  }
+
+  private void HandleInput(KeyboardEventArgs args)
+  {
+    _game?.HandleInput(args.Key);
+  }
+
+  private void ShowGameOver()
+  {
+    IsGameOver = true;
+  }
+}

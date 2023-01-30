@@ -63,6 +63,20 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
+.background {
+  background-image: linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+  display: flex;
+  min-height: 100vh;
+  min-width: 100vw;
+  flex-direction: column;
+}
+
+.body-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .window {
   height: 100vh;
 }

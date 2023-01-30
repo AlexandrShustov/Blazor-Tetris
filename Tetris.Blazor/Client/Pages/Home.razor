@@ -1,23 +1,16 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
 
-<div class="background d-flex flex-column align-items-center">
-  <div class="flex-bar">
-    <MudStack Justify="Justify.Center" Row="true">
-      <MudButton Variant="Variant.Text" Color="Color.Secondary">Home</MudButton>
-      <MudButton Variant="Variant.Text" Color="Color.Primary">Leaders</MudButton>
-    </MudStack>
-  </div>
-
+<div class="d-flex flex-column align-items-center flex-grow-1">
   <div class="d-flex flex-column justify-content-center flex-content">
     <MudText Typo="Typo.h1" Class="fw-bold" Color="Color.Primary" Align="Align.Center">
       Tetris
     </MudText>
 
     <MudText Typo="Typo.h5" Color="Color.Secondary" Align="Align.Center">
-      It's a simple app built with 
+      It's a simple app built with
       <MudText Color="Color.Primary" Inline="true" GutterBottom="true" Typo="Typo.inherit">Blazor</MudText>
-      <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Primary" Title="Favorite" />
+      <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Primary" Title="Favorite"/>
     </MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary"
                FullWidth="false" Size="Size.Large"
