@@ -21,9 +21,6 @@ public class Field
       _grid[x][y] = new Cell(x, y);
   }
 
-  private bool IsInBoundaries(int x, int y) => 
-    x >= 0 && x < RowCount  && y >= 0 && y < ColumnCount;
-
   public Cell? ElementAt(Position pos)
   {
     if (!IsInBoundaries(pos.X, pos.Y))
@@ -64,6 +61,16 @@ public class Field
       RaiseRowUp(index);
     }
   }
+
+  public void Clear()
+  {
+    for (var x = 0; x < RowCount; x++)
+    for (var y = 0; y < ColumnCount; y++)
+      _grid[x][y].Figure = null;
+  }
+
+  private bool IsInBoundaries(int x, int y) =>
+    x >= 0 && x < RowCount && y >= 0 && y < ColumnCount;
 
   private void RaiseRowUp(int index)
   {

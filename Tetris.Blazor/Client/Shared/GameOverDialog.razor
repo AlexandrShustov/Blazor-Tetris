@@ -1,0 +1,21 @@
+﻿<MudDialog>
+  <DialogContent>
+    <div class="d-flex flex-column">
+      <MudText Color="Color.Secondary" Align="Align.Center" GutterBottom="true">Your score: @Score</MudText>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Home</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Restart'</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  [Parameter] public int Score { get; set; }
+
+  void Submit() => MudDialog.Close(DialogResult.Ok(true));
+  void Cancel() => MudDialog.Cancel();
+}

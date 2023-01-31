@@ -1,3 +1,11 @@
 ﻿.game-container {
+  display: flex;
   flex: 1 0 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.game {
+  display: flex;
+  justify-content: space-between;
 }

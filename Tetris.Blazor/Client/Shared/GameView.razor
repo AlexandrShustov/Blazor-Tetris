@@ -1,0 +1,40 @@
+﻿@using Tetris.Blazor.Shared.Entities
+
+<div class="game-field" tabindex="0" @onkeydown="HandleInput" @ref="_container">
+  @if (Game is null)
+  {
+    <div>
+      <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="my-7" />
+    </div>
+  }
+  else
+  {
+    @foreach (var cell in Game.Field.Iterate())
+    {
+      <div @key="new {cell.Position.X, cell.Position.Y}" class="cell @(cell.State == State.Filled ? "filled-cell" : "")">
+      </div>
+    }
+  }
+</div>
+
+@code {
+  [Parameter]
+  public Game Game { get; set; }
+  
+  private ElementReference _container;
+
+  protected override void OnInitialized()
+  {
+    Game.Updated += StateHasChanged;
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await _container.FocusAsync(true);
+  }
+
+  private void HandleInput(KeyboardEventArgs args)
+  {
+    Game?.HandleInput(args.Key);
+  }
+}

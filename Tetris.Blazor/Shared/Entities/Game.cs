@@ -8,10 +8,13 @@ public class Game
   public event Action Updated;
   public event Action ScoreUpdated;
   public event Action GameOver;
-  public Field Field { get; }
 
-  private readonly Timer _timer;
+  public Field Field { get; private set; }
+  public bool IsRunning => _timer.Enabled;
+
   private long _interval;
+  
+  private readonly Timer _timer;
   private TimeSpan _gameSpeed;
   private DateTime _lastUpdateTime = DateTime.MinValue;
 
@@ -30,28 +33,63 @@ public class Game
     }
   }
 
-  private InputMap _inputMap;
+  private readonly InputMap _inputMap;
 
   private Figure? _currentFigure;
 
   public Game()
   {
     Field = new Field(24, 10);
-
-    _interval = 750;
-    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+    _timer = new Timer();
+    _timer.Elapsed += TimerOnElapsed;
+    
+    SetInitialIntervals();
 
     _inputMap = new InputMap();
 
     _pool = new List<Func<Figure>>()
     {
-      () => new O(), () => new I(), () => new J(), () => new L(), () => new S(), () => new Z(), () => new T()
+      () => new O(),
+      () => new I(),
+      () => new J(),
+      () => new L(),
+      () => new S(),
+      () => new Z(),
+      () => new T()
     };
+  }
 
-    _timer = new Timer();
+  private void SetInitialIntervals()
+  {
     _timer.Interval = 50;
-    _timer.Elapsed += TimerOnElapsed;
+    _interval = 750;
+    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+  }
+
+  public void Start()
+  {
+    Field.Clear();
+    SetInitialIntervals();
+    Score = 0;
+
     _timer.Enabled = true;
+  }
+
+  public void Stop()
+  {
+    _timer.Enabled = false;
+  }
+
+  public void HandleInput(string pressedKeyCode)
+  {
+    if (!IsRunning)
+      return;
+
+    var moveType = _inputMap.GetMoveTypeBy(pressedKeyCode);
+    if (moveType is null || _currentFigure is null)
+      return;
+
+    PerformMovement(moveType.Value);
   }
 
   private void TimerOnElapsed(object? sender, ElapsedEventArgs e)
@@ -91,7 +129,7 @@ public class Game
       return;
 
     GameOver?.Invoke();
-    _timer.Enabled = false;
+    Stop();
     _currentFigure = null;
   }
 
@@ -194,16 +232,7 @@ public class Game
     return @new;
   }
 
-  public void HandleInput(string pressedKeyCode)
-  {
-    var moveType = _inputMap.GetMoveTypeBy(pressedKeyCode);
-    if (moveType is null || _currentFigure is null)
-      return;
-
-    PerformMovement(moveType.Value);
-  }
-
-  public bool IsLanded(Figure figure)
+  private bool IsLanded(Figure figure)
   {
     var currentPos = figure.Position;
     var nextPos = Figure.NextDownPosition(currentPos);

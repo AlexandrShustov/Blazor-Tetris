@@ -1,59 +1,43 @@
 ﻿@page "/play"
 @using Tetris.Blazor.Shared.Entities
 
-<div class="d-flex flex-column">
-  <div class="game-container">
-    <div tabindex="0" class="row h-100 w-100" @onkeydown="HandleInput" @ref="_container">
-      <div class="d-flex flex-row align-items-center justify-content-center">
-        <div class="game-field">
-          @if (_game is null)
-          {
-            <div>
-              <MudProgressLinear Color="Color.Secondary" Indeterminate="true" Class="my-7" />
-            </div>
-          }
-          else
-          {
-            @foreach (var cell in _game.Field.Iterate())
-            {
-              <div @key="new {cell.Position.X, cell.Position.Y}" class="cell @(cell.State == State.Filled ? "filled-cell" : "")">
-              </div>
-            }
-          }
-        </div>
-        <div class="align-self-start">
-          <p>Score: @(_game?.Score ?? 0)</p>
-        </div>
-      </div>
-    </div>
+@inject IDialogService _dialogService
+@inject NavigationManager _navigation
+
+<div class="game-container">
+  <MudPaper Elevation="0" Square="true">
+    <MudText Align="Align.Center">Score: @_game?.Score</MudText>
+  </MudPaper>
+  <div class="game">
+    <GameView Game="_game"></GameView>
   </div>
 </div>
 
 @code
 {
   private Game? _game;
-  private ElementReference _container;
-  public bool IsGameOver = false;
+  private readonly DialogOptions _options = new() { Position = DialogPosition.Center, MaxWidth = MaxWidth.Large };
 
   protected override void OnInitialized()
   {
     _game = new Game();
-    _game.Updated += StateHasChanged;
-    _game.GameOver += ShowGameOver;
+    _game.ScoreUpdated += StateHasChanged;
+    _game.GameOver += async () => await ShowGameOverDialog();
+    _game.Start();
   }
 
-  protected override async Task OnAfterRenderAsync(bool firstRender)
+  private async Task ShowGameOverDialog()
   {
-    await _container.FocusAsync(true);
-  }
-
-  private void HandleInput(KeyboardEventArgs args)
-  {
-    _game?.HandleInput(args.Key);
-  }
-
-  private void ShowGameOver()
-  {
-    IsGameOver = true;
+    var parameters = new DialogParameters {{"Score", _game?.Score}};
+    var dialog = await _dialogService.ShowAsync<GameOverDialog>("Try again?", parameters, _options);
+    var result = await dialog.Result;
+    if (result.Canceled)
+    {
+      _navigation.NavigateTo("/");
+    }  
+    else
+    {
+      _game?.Start();
+    }
   }
 }
