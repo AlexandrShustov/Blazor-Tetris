@@ -2,7 +2,8 @@
   <DialogContent>
     <MudContainer>
       <div class="d-flex flex-column">
-        <MudText Color="Color.Secondary" Align="Align.Center">Your score: @Score</MudText>
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Align="Align.Left">To move tetrominos use <b>Arrow</b> keys.</MudText>
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Align="Align.Left">To quick land use <b>Space</b> key.</MudText>
       </div>
     </MudContainer>
   </DialogContent>
@@ -11,14 +12,7 @@
                Variant="Variant.Filled"
                Color="Color.Primary"
                OnClick="Submit">
-      Restart
-    </MudButton>
-    
-    <MudButton DisableElevation="true"
-               Color="Color.Secondary"
-               Variant="Variant.Filled"
-               OnClick="Cancel">
-      Home
+      Okay
     </MudButton>
   </DialogActions>
 </MudDialog>

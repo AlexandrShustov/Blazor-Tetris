@@ -19,9 +19,20 @@ public class Game
   private DateTime _lastUpdateTime = DateTime.MinValue;
 
   private int _score = 0;
+  private int _level = 0;
 
   private readonly Random _random = new Random();
   private readonly List<Func<Figure>> _pool;
+
+  public int Level
+  {
+    get => _level == 0 ? 1 : _level;
+    set
+    {
+      _level = value;
+      ScoreUpdated?.Invoke();
+    }
+  }
 
   public int Score
   {
@@ -70,7 +81,9 @@ public class Game
   {
     Field.Clear();
     SetInitialIntervals();
-    Score = 0;
+
+    _level = 1;
+    _score = 0;
 
     _timer.Enabled = true;
   }
@@ -118,8 +131,9 @@ public class Game
 
     var eliminated = EliminateFullRows();
     Score += eliminated.Length;
-    _interval -= eliminated.Length * 10;
-    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+    Level = Score / 5;
+
+    _gameSpeed = TimeSpan.FromMilliseconds(_interval - _level * 50);
     Updated?.Invoke();
   }
 

@@ -24,4 +24,8 @@
     <_ContentIncludedByDefault Remove="Pages\Home.razor" />
   </ItemGroup>
 
+	<PropertyGroup>
+		<RunAOTCompilation>true</RunAOTCompilation>
+	</PropertyGroup>
+
 </Project>
