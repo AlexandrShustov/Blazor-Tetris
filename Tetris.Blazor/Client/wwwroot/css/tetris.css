@@ -1,8 +1,8 @@
 ﻿.game-field {
   display: grid;
   grid-template-columns: repeat(10, 0fr);
-  width: 20vw;
-  height: 40vw;
+  width: 20em;
+  height: 40em;
 }
 
 .game-field:focus {
@@ -11,8 +11,8 @@
 
 .cell {
   background-color: #ECEBE4;
-  width: 2vw;
-  height: 2vw;
+  width: 2em;
+  height: 2em;
   border-width: 1px;
   border-color: #cfcec6;
   border-style: solid;
