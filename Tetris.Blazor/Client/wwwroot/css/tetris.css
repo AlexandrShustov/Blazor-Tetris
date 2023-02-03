@@ -5,15 +5,19 @@
   height: 40vw;
 }
 
+.game-field:focus {
+  outline: none;
+}
+
 .cell {
-  background-color: cadetblue;
+  background-color: #ECEBE4;
   width: 2vw;
   height: 2vw;
-  border-width: thin;
+  border-width: 1px;
+  border-color: #cfcec6;
   border-style: solid;
-  border-color: darkcyan;
 }
 
 .filled-cell {
-  background-color: chocolate;
+  background-color: #D4616C;
 }
