@@ -12,13 +12,24 @@
       <MudText Color="Color.Primary" Inline="true" GutterBottom="true" Typo="Typo.inherit">Blazor</MudText>
       <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Primary" Title="Favorite"/>
     </MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary"
-               FullWidth="false" Size="Size.Large"
-               DisableElevation="true"
-               Class="align-self-center mt-5"
-               OnClick="GoToGame">
-      Play
-    </MudButton>
+
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Stretch" Spacing="2" Class="px-5 mt-5">
+
+      <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                 FullWidth="false" Size="Size.Large"
+                 DisableElevation="true"
+                 OnClick="GoToGame">
+        Play solo
+      </MudButton>
+
+      <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                 FullWidth="false" Size="Size.Large"
+                 DisableElevation="true"
+                 OnClick="GoToLobbies">
+        Play with others
+      </MudButton>
+
+    </MudStack>
   </div>
 </div>
 
@@ -27,5 +38,10 @@
   private void GoToGame()
   {
     Navigation.NavigateTo("/play");
+  }
+
+  private void GoToLobbies()
+  {
+    Navigation.NavigateTo("/lobbies");
   }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.9" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.2" />
     <PackageReference Include="MudBlazor" Version="6.1.7" />
   </ItemGroup>
 
@@ -21,11 +22,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\GameLobbies.razor" />
     <_ContentIncludedByDefault Remove="Pages\Home.razor" />
   </ItemGroup>
 
 	<PropertyGroup>
 		<RunAOTCompilation>true</RunAOTCompilation>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="Pages\GameLobbies.razor" />
+	</ItemGroup>
 
 </Project>

@@ -1,0 +1,95 @@
+﻿@page "/play/{id}"
+@using Tetris.Blazor.Shared.Entities
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject HttpClient _httpClient
+@inject NavigationManager _navigation
+@inject IDialogService _dialogs
+
+<MudContainer>
+  @if (_joined)
+  {
+    <MudText Typo="Typo.body1"
+             Color="Color.Primary">
+      You've joined @(_gameDto?.Name ?? "unnamed") game!
+    </MudText>
+  }
+  @if (_ready)
+  {
+    <MudText Typo="Typo.body1"
+           Color="Color.Primary">
+      You are ready!
+    </MudText>
+  }
+  @if (_started)
+  {
+    <MudText Typo="Typo.body1"
+             Color="Color.Primary">
+      The game has started!!
+    </MudText>
+  }
+</MudContainer>
+
+@code {
+
+  [Parameter]
+  public string Id { get; set; }
+
+  private HubConnection? _hubConnection;
+
+  private bool _joined = false;
+  private bool _started = false;
+  private bool _ready = false;
+
+  private GameDto? _gameDto;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _gameDto = await _httpClient.GetFromJsonAsync<GameDto>($"api/game/{Id}");
+    if (_gameDto is not { })
+      return;
+
+    _hubConnection = new HubConnectionBuilder()
+      .WithUrl(_navigation.ToAbsoluteUri("/gamehub"))
+      .Build();
+
+    _hubConnection.On<Guid>("GameJoined", OnGameJoined);
+    _hubConnection.On<Guid>("GetReady", OnGetReady);
+    _hubConnection.On<Guid>("Start", OnStart);
+
+    await _hubConnection.StartAsync();
+    await _hubConnection.SendAsync("JoinGame", _gameDto.Id);
+  }
+
+  private async Task OnGetReady(Guid gameId)
+  {
+    if (_gameDto!.Id == gameId)
+    {
+      var dialog = await _dialogs.ShowAsync<GetReadyDialog>();
+      var result = await dialog.Result;
+      if ((bool) (result.Data))
+      {
+        await _hubConnection!.SendAsync("Ready", _gameDto.Id);
+        _ready = true;
+      }
+    }
+  }
+
+  private void OnGameJoined(Guid gameId)
+  {
+    if (_gameDto!.Id == gameId)
+    {
+      _joined = true;
+      StateHasChanged();
+    }
+  }
+
+  private void OnStart(Guid arg)
+  {
+    if (_gameDto!.Id != arg)
+      return;
+
+    _started = true;
+    StateHasChanged();
+  }
+}

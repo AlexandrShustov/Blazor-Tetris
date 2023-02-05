@@ -1,0 +1,29 @@
+﻿@using Tetris.Blazor.Shared.Entities
+<MudDialog>
+  <DialogContent>
+    <MudContainer>
+      <div class="d-flex flex-column">
+        <MudCheckBox @bind-Checked="@_newGame.IsPrivate" Label="IsPrivate" Color="Color.Primary"></MudCheckBox>
+        <MudTextField @bind-Value="@_newGame.Name" Label="Name" Variant="Variant.Text"></MudTextField>
+      </div>
+    </MudContainer>
+  </DialogContent>
+  <DialogActions>
+    <MudButton DisableElevation="true"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="Submit">
+      Create
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  private NewGameDto _newGame = new NewGameDto();
+
+  void Submit() => MudDialog.Close(DialogResult.Ok(_newGame));
+  void Cancel() => MudDialog.Cancel();
+}

@@ -1,0 +1,92 @@
+﻿@page "/lobbies"
+@using Tetris.Blazor.Shared.Entities
+
+@inject IDialogService _dialogs
+@inject HttpClient _httpClient
+@inject NavigationManager _navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-5">
+  <MudButton Variant="Variant.Text"
+             Class="mb-2"
+             OnClick="() => OpenCreateGameDialog()"
+             StartIcon="@Icons.Material.Filled.Add">
+    Create a game
+  </MudButton>
+  
+  @if (_error != null)
+  {
+    <MudText Typo="Typo.body2" Color="Color.Secondary">@_error</MudText>
+  }
+
+  <MudTable Items="@_games" Hover="true" Class="servers-table" Elevation="0">
+    <HeaderContent>
+      <MudTh><MudText Color="Color.Primary">Name</MudText></MudTh>
+      <MudTh><MudText Color="Color.Primary">Created by</MudText></MudTh>
+      <MudTh><MudText Color="Color.Primary">Is private</MudText></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+      <MudTd><MudText Color="Color.Secondary" Typo="Typo.body2">@context.Name</MudText></MudTd>
+      <MudTd><MudText Color="Color.Secondary" Typo="Typo.body2">@context.CreatedBy</MudText></MudTd>
+      <MudTd><MudText Color="Color.Secondary" Typo="Typo.body2">@context.IsPrivate</MudText></MudTd>
+      <MudTd Class="d-flex flex-column justify-content-center align-items-stretch">
+        <MudButton Color="Color.Primary" 
+                   DisableElevation="true"
+                   StartIcon="@Icons.Material.Filled.ArrowRight"
+                   OnClick="() => JoinGame(context.Id)">
+          Join
+        </MudButton>
+      </MudTd>
+    </RowTemplate>
+  </MudTable>
+</MudContainer>
+
+@code {
+
+  private string _error = null;
+
+  private IEnumerable<GameDto> _games = new List<GameDto>();
+
+  protected override async Task OnInitializedAsync()
+  {
+    await FetchGames();
+    StateHasChanged();
+  }
+
+  private async Task FetchGames()
+  {
+    var games = await _httpClient.GetFromJsonAsync<GameDto[]>("/api/game/all");
+    _games = games?.ToList() ?? new List<GameDto>();
+  }
+
+  private async Task OpenCreateGameDialog()
+  {
+    var options = new DialogOptions()
+    {
+      CloseButton = true,
+      CloseOnEscapeKey = false,
+      DisableBackdropClick = true,
+      Position = DialogPosition.Center
+    };
+
+    var dialog = await _dialogs.ShowAsync<CreateGameDialog>("Create a game", options);
+    var result = await dialog.Result;
+    if (result?.Data is NewGameDto obj)
+    {
+      var response = await _httpClient.PostAsJsonAsync("api/game/create", obj);
+      if (response.IsSuccessStatusCode is false)
+      {
+        _error = $"{response.StatusCode}: {response.ReasonPhrase}";
+      }
+      else
+      {
+        var game = await response.Content.ReadFromJsonAsync<GameDto?>();
+        _navigation.NavigateTo($"/play/{game!.Id}");
+      }
+    }
+  }
+
+  private void JoinGame(Guid gameId)
+  {
+    _navigation.NavigateTo($"/play/{gameId}");
+  }
+}

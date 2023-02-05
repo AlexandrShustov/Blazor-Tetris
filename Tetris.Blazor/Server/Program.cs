@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.ResponseCompression;
+using Tetris.Blazor.Server;
+using Tetris.Blazor.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IGameStorage, GameStorage>();
 builder.WebHost.UseStaticWebAssets();
 
 var app = builder.Build();
@@ -28,10 +32,9 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.MapHub<GameHub>("/gamehub");
 
 app.Run();

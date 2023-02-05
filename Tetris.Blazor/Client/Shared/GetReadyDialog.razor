@@ -1,0 +1,26 @@
+﻿<MudDialog>
+  <DialogContent>
+    <MudContainer>
+      <MudText Typo="Typo.body1"
+               Color="Color.Secondary">
+        Your opponent has joined the game.
+        If you are ready to begin, press the button below.
+      </MudText>
+    </MudContainer>
+  </DialogContent>
+  <DialogActions>
+    <MudButton DisableElevation="true"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="Submit">
+      I'm ready!
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  void Submit() => MudDialog.Close(DialogResult.Ok(true));
+}
