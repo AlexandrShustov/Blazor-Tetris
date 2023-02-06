@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Tetris.Blazor.Server.Entities;
+using Tetris.Blazor.Shared.SignalR;
 
 namespace Tetris.Blazor.Server.Hubs;
 

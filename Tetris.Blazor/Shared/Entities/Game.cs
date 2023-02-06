@@ -3,9 +3,12 @@ using Timer = System.Timers.Timer;
 
 namespace Tetris.Blazor.Shared.Entities;
 
-public class Game
+public class Game : ILocalGame
 {
+  IEnumerable<Cell> IGame.Field() => Field.Iterate();
+  
   public event Action Updated;
+
   public event Action ScoreUpdated;
   public event Action GameOver;
 
@@ -175,7 +178,7 @@ public class Game
     return rowsToEliminate.ToArray();
   }
 
-  public void PerformMovement(MoveType moveType)
+  private void PerformMovement(MoveType moveType)
   {
     var figure = _currentFigure;
 

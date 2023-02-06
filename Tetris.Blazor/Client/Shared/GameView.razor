@@ -9,7 +9,7 @@
   }
   else
   {
-    @foreach (var cell in Game.Field.Iterate())
+    @foreach (var cell in Game.Field())
     {
       <div @key="new {cell.Position.X, cell.Position.Y}" class="cell @(cell.State == State.Filled ? "filled-cell" : "")">
       </div>
@@ -19,7 +19,7 @@
 
 @code {
   [Parameter]
-  public Game Game { get; set; }
+  public IGame Game { get; set; }
   
   private ElementReference _container;
 
@@ -35,6 +35,7 @@
 
   private void HandleInput(KeyboardEventArgs args)
   {
-    Game?.HandleInput(args.Key);
+    if (Game is ILocalGame x)
+      x?.HandleInput(args.Key);
   }
 }

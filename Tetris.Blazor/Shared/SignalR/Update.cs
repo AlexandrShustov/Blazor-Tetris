@@ -1,6 +1,10 @@
-﻿namespace Tetris.Blazor.Shared.SignalR;
+﻿using Tetris.Blazor.Shared.Entities;
+
+namespace Tetris.Blazor.Shared.SignalR;
 
 public class Update
 {
-  public string Message { get; set; }
+  public IEnumerable<Cell> Field { get; set; }
+  public int Score { get; set; }
+  public int Level { get; set; }
 }

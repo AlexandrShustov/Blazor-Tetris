@@ -1,6 +1,8 @@
 ﻿@page "/play/{id}"
 @using Tetris.Blazor.Shared.Entities
 @using Microsoft.AspNetCore.SignalR.Client
+@using Tetris.Blazor.Shared.SignalR
+@using System.Runtime.InteropServices
 
 @inject HttpClient _httpClient
 @inject NavigationManager _navigation
@@ -28,18 +30,30 @@
       The game has started!!
     </MudText>
   }
+  
+  <MudGrid>
+    <MudItem Class="d-flex flex-column justify-content-center" xs="6">
+      <GameView Game="@_localGame"></GameView>
+    </MudItem>
+    <MudItem Class="d-flex flex-column justify-content-center" xs="6">
+      <GameView Game="@_remoteGame"></GameView>
+    </MudItem>
+  </MudGrid>
+
 </MudContainer>
 
 @code {
-
   [Parameter]
   public string Id { get; set; }
 
   private HubConnection? _hubConnection;
 
+  private readonly ILocalGame _localGame = new Game();
+  private readonly IRemoteGame _remoteGame = new RemoteGame();
+
   private bool _joined = false;
-  private bool _started = false;
   private bool _ready = false;
+  private bool _started = false;
 
   private GameDto? _gameDto;
 
@@ -59,6 +73,8 @@
 
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync("JoinGame", _gameDto.Id);
+
+    _localGame.Updated += SendUpdate;
   }
 
   private async Task OnGetReady(Guid gameId)
@@ -71,6 +87,7 @@
       {
         await _hubConnection!.SendAsync("Ready", _gameDto.Id);
         _ready = true;
+        StateHasChanged();
       }
     }
   }
@@ -90,6 +107,19 @@
       return;
 
     _started = true;
+    _localGame.Start();
     StateHasChanged();
+  }
+
+  private async void SendUpdate()
+  {
+    var update = new Update()
+    {
+      Field = _localGame.Field().ToList(),
+      Level = _localGame.Level,
+      Score = _localGame.Score
+    };
+
+    await _hubConnection.SendAsync("Update", update);
   }
 }
