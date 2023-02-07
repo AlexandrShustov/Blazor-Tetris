@@ -7,26 +7,21 @@ public class Game
   public bool IsPrivate { get; set; }
   public State State { get; set; }
 
-  public Player? PlayerOne { get; set; }
-  public Player? PlayerTwo { get; set; }
+  public Dictionary<string, Player> Players { get; set; }
 
-  public Player? PlayerWith(string connection)
+  public Game()
   {
-    if (PlayerOne?.ConnectionId == connection )
-      return PlayerOne;
-
-    if (PlayerTwo?.ConnectionId == connection)
-      return PlayerTwo;
-
-    return null;
+    Players = new Dictionary<string, Player>();
   }
 
-  public IEnumerable<Player?> Players()
-  {
-    yield return PlayerOne;
-    yield return PlayerTwo;
-  }
+  public Player? PlayerWith(string connection) => 
+    Players.TryGetValue(connection, out var player) 
+      ? player
+      : null;
 
-  public bool EveryoneIsReady() => 
-    (PlayerOne?.IsReady ?? false) && (PlayerTwo?.IsReady ?? false);
+  public bool EveryoneIsReady() =>
+    Players.Values.All(x => x.IsReady);
+
+  public Player? OpponentOf(string connection) => 
+    Players.Values.FirstOrDefault(x => x.ConnectionId != connection);
 }

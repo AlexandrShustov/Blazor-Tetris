@@ -30,7 +30,8 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    await _container.FocusAsync(true);
+    if (Game is ILocalGame)
+      await _container.FocusAsync(true);
   }
 
   private void HandleInput(KeyboardEventArgs args)

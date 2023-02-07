@@ -1,9 +1,13 @@
-﻿namespace Tetris.Blazor.Shared.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace Tetris.Blazor.Shared.Entities;
 
 public struct Position
 {
   public int X { get; set; }
   public int Y { get; set; }
+
+  [JsonIgnore]
   public bool IsPivot { get; set; }
 
   public Position(int x, int y, bool pivot = false)

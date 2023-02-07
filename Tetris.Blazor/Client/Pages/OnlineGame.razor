@@ -2,7 +2,8 @@
 @using Tetris.Blazor.Shared.Entities
 @using Microsoft.AspNetCore.SignalR.Client
 @using Tetris.Blazor.Shared.SignalR
-@using System.Runtime.InteropServices
+@using System.Timers
+@using Position = Tetris.Blazor.Shared.Entities.Position
 
 @inject HttpClient _httpClient
 @inject NavigationManager _navigation
@@ -55,6 +56,10 @@
   private bool _ready = false;
   private bool _started = false;
 
+  private Update _gameUpdate;
+
+  private readonly Timer _timer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
+
   private GameDto? _gameDto;
 
   protected override async Task OnInitializedAsync()
@@ -63,18 +68,21 @@
     if (_gameDto is not { })
       return;
 
+    _gameUpdate = new Update(_gameDto.Id);
+
     _hubConnection = new HubConnectionBuilder()
       .WithUrl(_navigation.ToAbsoluteUri("/gamehub"))
       .Build();
 
-    _hubConnection.On<Guid>("GameJoined", OnGameJoined);
-    _hubConnection.On<Guid>("GetReady", OnGetReady);
-    _hubConnection.On<Guid>("Start", OnStart);
+    _hubConnection.On<Guid>(Method.Client.GameJoined, OnGameJoined);
+    _hubConnection.On<Guid>(Method.Client.GetReady, OnGetReady);
+    _hubConnection.On<Guid>(Method.Client.Start, OnStart);
+    _hubConnection.On<Update>(Method.Client.HandleUpdate, HandleUpdate);
 
     await _hubConnection.StartAsync();
-    await _hubConnection.SendAsync("JoinGame", _gameDto.Id);
+    await _hubConnection.SendAsync(Method.JoinGame, _gameDto.Id);
 
-    _localGame.Updated += SendUpdate;
+    _timer.Elapsed += (_, _) => SendUpdate(_localGame, _hubConnection, _gameDto);
   }
 
   private async Task OnGetReady(Guid gameId)
@@ -85,7 +93,7 @@
       var result = await dialog.Result;
       if ((bool) (result.Data))
       {
-        await _hubConnection!.SendAsync("Ready", _gameDto.Id);
+        await _hubConnection!.SendAsync(Method.Ready, _gameDto.Id);
         _ready = true;
         StateHasChanged();
       }
@@ -108,18 +116,33 @@
 
     _started = true;
     _localGame.Start();
+    _timer.Start();
+
     StateHasChanged();
   }
 
-  private async void SendUpdate()
+  private async void SendUpdate(ILocalGame game, HubConnection connection, GameDto gameDto)
   {
-    var update = new Update()
-    {
-      Field = _localGame.Field().ToList(),
-      Level = _localGame.Level,
-      Score = _localGame.Score
-    };
+    _gameUpdate.Reset();
+    _gameUpdate.Add(EmptyPositions());
+    _gameUpdate.SetLevel(_localGame.Level);
+    _gameUpdate.SetScore(_localGame.Score);
+    
+    await connection!.SendAsync(Method.Update, _gameUpdate);
 
-    await _hubConnection.SendAsync("Update", update);
+    IEnumerable<Position> EmptyPositions()
+    {
+      foreach (var cell in game.Field())
+      {
+        if (cell.State == State.Filled)
+          yield return cell.Position;
+      }
+    }
+  }
+
+  private void HandleUpdate(Update obj)
+  {
+    _remoteGame.HandleUpdate(obj);
+    StateHasChanged();
   }
 }

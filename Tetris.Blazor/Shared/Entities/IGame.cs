@@ -20,5 +20,5 @@ public interface ILocalGame : IGame
 
 public interface IRemoteGame : IGame
 {
-  void ApplyUpdate(Update update);
+  void HandleUpdate(Update update);
 }

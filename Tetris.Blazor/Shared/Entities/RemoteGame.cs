@@ -8,36 +8,49 @@ public class RemoteGame : IRemoteGame
   public int Level { get; set; }
   public event Action? Updated;
 
-  private Cell[][] _grid;
+  private readonly Cell[][] _grid;
+  private readonly Figure _defaultFigure = new S();
+
+  private readonly int _rowCount;
+  private readonly int _columnCount;
 
   public RemoteGame()
   {
-    var RowCount = 20;
-    var ColumnCount = 10;
+    _rowCount = 24;
+    _columnCount = 10;
 
-    _grid = new Cell[RowCount][];
-    for (int i = 0; i < RowCount; i++)
-      _grid[i] = new Cell[ColumnCount];
+    _grid = new Cell[_rowCount][];
 
-    for (var x = 0; x < RowCount; x++)
-    for (var y = 0; y < ColumnCount; y++)
+    for (int i = 0; i < _rowCount; i++)
+      _grid[i] = new Cell[_columnCount];
+
+    for (var x = 0; x < _rowCount; x++)
+    for (var y = 0; y < _columnCount; y++)
       _grid[x][y] = new Cell(x, y);
   }
 
   public IEnumerable<Cell> Field()
   {
-    foreach (var row in _grid)
-    {
-      foreach (var cell in row)
-      {
-        yield return cell;
-      }
-    }
+    for (var x = 4; x < _rowCount; x++)
+    for (var y = 0; y < _columnCount; y++)
+      yield return _grid[x][y];
   }
 
-  public void ApplyUpdate(Update update)
+  public void HandleUpdate(Update update)
   {
-    _grid = update.Field;
+    var set = update.Field.ToHashSet();
+
+    for (var i = 0; i < _rowCount; i++)
+    for (var j = 0; j < _columnCount; j++)
+    {
+      var cell = _grid[i][j];
+
+      if (!set.Contains(cell.Position))
+        cell.Release();
+      else if (cell.State == State.Empty)
+        cell.Occupy(_defaultFigure);
+    }
+
     Score = update.Score;
     Level = update.Level;
 

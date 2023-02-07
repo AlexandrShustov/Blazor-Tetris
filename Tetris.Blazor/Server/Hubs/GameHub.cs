@@ -16,35 +16,26 @@ public class GameHub : Hub
   public async Task JoinGame(Guid gameId)
   {
     var game = await _storage.OneBy(gameId);
-    if (game is null)
+    if (game is null || game.Players.Count == 2)
       return;
 
-    if (game.PlayerOne is null)
-      game.PlayerOne = new Player()
-      {
-        ConnectionId = Context.ConnectionId
-      };
-    else
+    game.Players.Add(Context.ConnectionId, new Player
     {
-      game.PlayerTwo = new Player()
-      {
-        ConnectionId = Context.ConnectionId
-      };
+      ConnectionId = Context.ConnectionId
+    });
+
+    if (game.Players.Count == 2) 
+    {
+      await Clients
+        .Clients(game.Players.Keys)
+        .SendAsync(Method.Client.GetReady, game.Id);
+
+      return;
     }
 
-    if (game.PlayerOne is not null && game.PlayerTwo is not null)
-    {
-      var connections = new[]
-      {
-        game.PlayerOne.ConnectionId,
-        game.PlayerTwo.ConnectionId
-      };
-
-      await Clients.Clients(connections)
-        .SendAsync("GetReady", game.Id);
-    }
-
-    await Clients.Caller.SendAsync("GameJoined", game.Id);
+    await Clients
+      .Caller
+      .SendAsync(Method.Client.GameJoined, game.Id);
   }
 
   public async Task Ready(Guid gameId)
@@ -59,14 +50,23 @@ public class GameHub : Hub
       return;
 
     player.IsReady = true;
+
     if (game.EveryoneIsReady())
     {
-      var connections = game.Players()!
-        .Select(x => x!.ConnectionId)
-        .ToList();
+      var connections = game.Players.Keys;
 
-      await Clients.Clients(connections).SendAsync("Start", game.Id);
+      await Clients.Clients(connections).SendAsync(Method.Client.Start, game.Id);
       game.State = State.Playing;
     }
+  }
+
+  public async Task Update(Update? update)
+  {
+    var game = await _storage.OneBy(update!.GameId);
+    if (game?.PlayerWith(Context.ConnectionId) is null)
+      return;
+
+    var opponent = game?.OpponentOf(Context.ConnectionId);
+    await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.HandleUpdate, update);
   }
 }
