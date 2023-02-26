@@ -1,0 +1,42 @@
+﻿@using Tetris.Blazor.Shared.Entities;
+<MudDialog>
+  <DialogContent>
+    <MudContainer>
+      <MudText Color="Color.Secondary" Typo="Typo.caption">@Message</MudText>
+      <MudText Color="Color.Secondary" Typo="Typo.caption">Play again?</MudText>
+    </MudContainer>
+  </DialogContent>
+  <DialogActions>
+    <MudButton DisableElevation="true"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               OnClick="Submit">
+      Play again
+    </MudButton>
+
+    <MudButton DisableElevation="true"
+               Color="Color.Secondary"
+               Variant="Variant.Filled"
+               OnClick="Cancel">
+      Home
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+
+  [Parameter] public int Score { get; set; }
+  [Parameter] public OnlineGameResult Result { get; set; }
+
+  private string Message { get; set; }
+
+  protected override void OnInitialized()
+  {
+    Message = $"The game is finished! {(Result.IsVictory ? "Victory!" : "Defeat...")}";
+  }
+
+  void Submit() => MudDialog.Close(DialogResult.Ok(true));
+  void Cancel() => MudDialog.Cancel();
+}

@@ -12,6 +12,9 @@ public class Game : ILocalGame
   public event Action ScoreUpdated;
   public event Action GameOver;
 
+  public int Level => GameLevel.CurrentLevel;
+  public IGameLevel GameLevel { get; set; }
+
   public Field Field { get; private set; }
   public bool IsRunning => _timer.Enabled;
 
@@ -26,16 +29,6 @@ public class Game : ILocalGame
 
   private readonly Random _random = new Random();
   private readonly List<Func<Figure>> _pool;
-
-  public int Level
-  {
-    get => _level == 0 ? 1 : _level;
-    set
-    {
-      _level = value;
-      ScoreUpdated?.Invoke();
-    }
-  }
 
   public int Score
   {
@@ -54,10 +47,10 @@ public class Game : ILocalGame
   public Game()
   {
     Field = new Field(24, 10);
+    GameLevel = new OfflineGameLevel(this);
+
     _timer = new Timer();
     _timer.Elapsed += TimerOnElapsed;
-    
-    SetInitialIntervals();
 
     _inputMap = new InputMap();
 
@@ -73,20 +66,26 @@ public class Game : ILocalGame
     };
   }
 
-  private void SetInitialIntervals()
+  private void SetInitialValues()
   {
+    _level = 1;
+    _score = 0;
     _timer.Interval = 50;
     _interval = 750;
-    _gameSpeed = TimeSpan.FromMilliseconds(_interval);
+    _currentFigure = null;
+
+    GameLevel.Reset();
+
+    _gameSpeed = CalculateSpeed();
   }
+
+  private TimeSpan CalculateSpeed() =>
+    TimeSpan.FromMilliseconds(_interval - GameLevel.CurrentLevel * 50);
 
   public void Start()
   {
     Field.Clear();
-    SetInitialIntervals();
-
-    _level = 1;
-    _score = 0;
+    SetInitialValues();
 
     _timer.Enabled = true;
   }
@@ -113,7 +112,18 @@ public class Game : ILocalGame
     var now = DateTime.UtcNow;
 
     CheckForGameOver();
-    CheckRowsToEliminate();
+
+    if (_currentFigure != null && IsLanded(_currentFigure))
+    {
+      var eliminated = EliminateRows();
+      if (eliminated != 0)
+      {
+        UpdateScores(eliminated);
+        Updated?.Invoke();
+      }
+    }
+
+    _gameSpeed = CalculateSpeed();
 
     var delta = now - _lastUpdateTime;
     if (delta < _gameSpeed)
@@ -125,19 +135,17 @@ public class Game : ILocalGame
     _lastUpdateTime = now;
   }
 
-  private void CheckRowsToEliminate()
+  private int EliminateRows()
   {
-    if (_currentFigure == null || !IsLanded(_currentFigure))
-      return;
-
     _currentFigure = Instantiate();
 
     var eliminated = EliminateFullRows();
-    Score += eliminated.Length;
-    Level = Score / 5;
+    return eliminated.Length;
+  }
 
-    _gameSpeed = TimeSpan.FromMilliseconds(_interval - _level * 50);
-    Updated?.Invoke();
+  private void UpdateScores(int eliminated)
+  {
+    Score += eliminated;
   }
 
   private void CheckForGameOver()

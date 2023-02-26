@@ -34,6 +34,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.MapRazorPages();
 app.MapControllers();
+app.MapGet("aaa", () => "aa");
 app.MapFallbackToFile("index.html");
 app.MapHub<GameHub>("/gamehub");
 

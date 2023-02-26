@@ -1,6 +1,6 @@
 ﻿namespace Tetris.Blazor.Server.Entities;
 
-public enum State
+public enum GameState
 {
   Waiting = 0,
   Playing = 1,

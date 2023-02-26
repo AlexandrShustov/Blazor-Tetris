@@ -18,7 +18,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Hubs\" />
-    <Folder Include="Entities\" />
   </ItemGroup>
 
 

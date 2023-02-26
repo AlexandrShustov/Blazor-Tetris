@@ -1,4 +1,5 @@
 ﻿@page "/play/{id}"
+
 @using Tetris.Blazor.Shared.Entities
 @using Microsoft.AspNetCore.SignalR.Client
 @using Tetris.Blazor.Shared.SignalR
@@ -10,35 +11,22 @@
 @inject IDialogService _dialogs
 
 <MudContainer>
-  @if (_joined)
-  {
-    <MudText Typo="Typo.body1"
-             Color="Color.Primary">
-      You've joined @(_gameDto?.Name ?? "unnamed") game!
-    </MudText>
-  }
-  @if (_ready)
-  {
-    <MudText Typo="Typo.body1"
-           Color="Color.Primary">
-      You are ready!
-    </MudText>
-  }
-  @if (_started)
-  {
-    <MudText Typo="Typo.body1"
-             Color="Color.Primary">
-      The game has started!!
-    </MudText>
-  }
-  
   <MudGrid>
-    <MudItem Class="d-flex flex-column justify-content-center" xs="6">
+
+    <MudItem Class="d-flex flex-column align-items-center" xs="5">
+      <MudPaper Elevation="0" Class="px-3 py-1 mb-1">
+        <MudText Typo="Typo.body2">Level: @_localGame.Level</MudText>
+      </MudPaper>
       <GameView Game="@_localGame"></GameView>
     </MudItem>
-    <MudItem Class="d-flex flex-column justify-content-center" xs="6">
+
+    <MudItem Class="d-flex flex-column align-items-center" xs="5">
+      <MudPaper Elevation="0" Class="px-3 py-1 mb-1">
+        <MudText Typo="Typo.body2">Level: @_remoteGame.Level</MudText>
+      </MudPaper>
       <GameView Game="@_remoteGame"></GameView>
     </MudItem>
+
   </MudGrid>
 
 </MudContainer>
@@ -52,11 +40,7 @@
   private readonly ILocalGame _localGame = new Game();
   private readonly IRemoteGame _remoteGame = new RemoteGame();
 
-  private bool _joined = false;
-  private bool _ready = false;
-  private bool _started = false;
-
-  private Update _gameUpdate;
+  private Update? _gameUpdate;
 
   private readonly Timer _timer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
 
@@ -68,6 +52,10 @@
     if (_gameDto is not { })
       return;
 
+    _localGame.ScoreUpdated += async () => await OnScoreUpdated();
+    _localGame.GameOver += async () => await OnGameOver();
+    _localGame.GameLevel = new OnlineGameLevel();
+
     _gameUpdate = new Update(_gameDto.Id);
 
     _hubConnection = new HubConnectionBuilder()
@@ -78,11 +66,20 @@
     _hubConnection.On<Guid>(Method.Client.GetReady, OnGetReady);
     _hubConnection.On<Guid>(Method.Client.Start, OnStart);
     _hubConnection.On<Update>(Method.Client.HandleUpdate, HandleUpdate);
+    _hubConnection.On<OnlineGameResult>(Method.Client.GameOver, OnOpponentGameOver);
 
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync(Method.JoinGame, _gameDto.Id);
 
-    _timer.Elapsed += (_, _) => SendUpdate(_localGame, _hubConnection, _gameDto);
+    _timer.Elapsed += async (_, _) => await OnUpdate();
+  }
+
+  private async Task OnScoreUpdated()
+  {
+    var update = new Update(_gameDto!.Id);
+    update.SetLevel(_localGame.Level);
+
+    await _hubConnection!.SendAsync(Method.ScoreUpdated, _gameUpdate);
   }
 
   private async Task OnGetReady(Guid gameId)
@@ -91,10 +88,9 @@
     {
       var dialog = await _dialogs.ShowAsync<GetReadyDialog>();
       var result = await dialog.Result;
-      if ((bool) (result.Data))
+      if ((bool)(result.Data))
       {
         await _hubConnection!.SendAsync(Method.Ready, _gameDto.Id);
-        _ready = true;
         StateHasChanged();
       }
     }
@@ -104,7 +100,6 @@
   {
     if (_gameDto!.Id == gameId)
     {
-      _joined = true;
       StateHasChanged();
     }
   }
@@ -114,25 +109,24 @@
     if (_gameDto!.Id != arg)
       return;
 
-    _started = true;
     _localGame.Start();
     _timer.Start();
 
     StateHasChanged();
   }
 
-  private async void SendUpdate(ILocalGame game, HubConnection connection, GameDto gameDto)
+  private async Task OnUpdate()
   {
-    _gameUpdate.Reset();
+    _gameUpdate!.Reset();
     _gameUpdate.Add(EmptyPositions());
     _gameUpdate.SetLevel(_localGame.Level);
     _gameUpdate.SetScore(_localGame.Score);
-    
-    await connection!.SendAsync(Method.Update, _gameUpdate);
+
+    await _hubConnection!.SendAsync(Method.Update, _gameUpdate);
 
     IEnumerable<Position> EmptyPositions()
     {
-      foreach (var cell in game.Field())
+      foreach (var cell in _localGame.Field())
       {
         if (cell.State == State.Filled)
           yield return cell.Position;
@@ -140,9 +134,41 @@
     }
   }
 
+  private async Task OnGameOver()
+  {
+    _localGame.Stop();
+
+    await OnUpdate();
+    await _hubConnection!.SendAsync(Method.GameOver, new Update()
+      {
+        GameId = _gameDto.Id,
+      });
+  }
+
   private void HandleUpdate(Update obj)
   {
     _remoteGame.HandleUpdate(obj);
+    _localGame.GameLevel.Update(obj.Score);
+
     StateHasChanged();
+  }
+
+  private async Task OnOpponentGameOver(OnlineGameResult result)
+  {
+    _localGame.Stop();
+
+    var parameters = new DialogParameters();
+    parameters.Add("Result", result);
+
+    var dialog = await _dialogs.ShowAsync<OnlineGameOverDialog>("Game over", parameters, new DialogOptions
+      {
+        CloseButton = false,
+        CloseOnEscapeKey = false,
+        Position = DialogPosition.Center
+      });
+
+    var dialogResponse = await dialog.Result;
+    if (!dialogResponse.Canceled)
+      await _hubConnection!.SendAsync(Method.Ready, _gameDto!.Id);
   }
 }

@@ -5,7 +5,7 @@ public class Game
   public Guid Id { get; set; }
   public string Name { get; set; }
   public bool IsPrivate { get; set; }
-  public State State { get; set; }
+  public GameState State { get; set; }
 
   public Dictionary<string, Player> Players { get; set; }
 
@@ -24,4 +24,12 @@ public class Game
 
   public Player? OpponentOf(string connection) => 
     Players.Values.FirstOrDefault(x => x.ConnectionId != connection);
+
+  internal void ResetReadyStatus()
+  {
+    foreach (var player in Players.Values)
+    {
+      player.IsReady = false;
+    }
+  }
 }

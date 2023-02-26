@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Tetris.Blazor.Server.Entities;
+using Tetris.Blazor.Shared.Entities;
 using Tetris.Blazor.Shared.SignalR;
 
 namespace Tetris.Blazor.Server.Hubs;
@@ -56,7 +57,7 @@ public class GameHub : Hub
       var connections = game.Players.Keys;
 
       await Clients.Clients(connections).SendAsync(Method.Client.Start, game.Id);
-      game.State = State.Playing;
+      game.State = GameState.Playing;
     }
   }
 
@@ -68,5 +69,36 @@ public class GameHub : Hub
 
     var opponent = game?.OpponentOf(Context.ConnectionId);
     await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.HandleUpdate, update);
+  }
+
+  public async Task ScoreUpdated(Update update)
+  {
+    var game = await _storage.OneBy(update.GameId);
+    if (game is null)
+      return;
+
+    var opponent = game.OpponentOf(Context.ConnectionId);
+    await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.HandleUpdate, update);
+  }
+
+  public async Task GameOver(Update update)
+  {
+    var game = await _storage.OneBy(update!.GameId);
+    if (game == null)
+      return;
+
+    game.ResetReadyStatus();
+
+    var result = new OnlineGameResult
+    {
+      IsVictory = true
+    };
+
+    var opponent = game.OpponentOf(Context.ConnectionId);
+
+    await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.GameOver, result);
+
+    result.IsVictory = false;
+    await Clients.Client(Context.ConnectionId).SendAsync(Method.Client.GameOver, result);
   }
 }

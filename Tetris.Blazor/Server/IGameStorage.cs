@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Mvc;
 using Tetris.Blazor.Server.Entities;
 
 namespace Tetris.Blazor.Server;
@@ -23,7 +22,7 @@ public class GameStorage : IGameStorage
   public Task<Game?> Create(Game game)
   {
     game.Id = Guid.NewGuid();
-    game.State = State.Waiting;
+    game.State = GameState.Waiting;
     
     _games.TryAdd(game.Id, game);
     return Task.FromResult<Game?>(game);
@@ -32,7 +31,7 @@ public class GameStorage : IGameStorage
   public Task<IEnumerable<Game>> All()
   {
     var waitingGames = _games.Values
-      .Where(x => x.State == State.Waiting)
+      .Where(x => x.State == GameState.Waiting)
       .ToList();
 
     return Task.FromResult(waitingGames as IEnumerable<Game>);
