@@ -1,10 +1,22 @@
 ﻿@using Tetris.Blazor.Shared.Entities
+
 <MudDialog>
   <DialogContent>
     <MudContainer>
-      <div class="d-flex flex-column">
-        <MudCheckBox @bind-Checked="@_newGame.IsPrivate" Label="IsPrivate" Color="Color.Primary"></MudCheckBox>
-        <MudTextField @bind-Value="@_newGame.Name" Label="Name" Variant="Variant.Text"></MudTextField>
+      <div class="d-flex flex-column align-items-start">
+        <MudCheckBox @bind-Checked="@_newGame.IsPrivate"
+                     Dense="true"
+                     UncheckedIcon="@Icons.Material.Outlined.Lock"
+                     CheckedIcon="@Icons.Material.Filled.Lock"
+                     Color="Color.Primary">
+          <MudText Color="Color.Secondary">
+            Private
+          </MudText>
+        </MudCheckBox>
+        <MudTextField @bind-Value="@_newGame.Name"
+                      Label="Name"
+                      AdornmentColor="Color.Secondary"
+                      Variant="Variant.Text"></MudTextField>
       </div>
     </MudContainer>
   </DialogContent>
