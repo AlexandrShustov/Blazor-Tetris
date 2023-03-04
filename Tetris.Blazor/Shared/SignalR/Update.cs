@@ -8,9 +8,6 @@ public sealed class Update
   [JsonPropertyName("f")]
   public List<Position> Field { get; set; }
 
-  [JsonPropertyName("g")]
-  public Guid GameId { get; set; }
-
   [JsonPropertyName("s")]
   public int Score { get; set; }
 
@@ -18,12 +15,8 @@ public sealed class Update
   public int Level { get; set; }
 
   public Update()
-  { }
-
-  public Update(Guid gameId)
   {
-    GameId = gameId;
-    Field = new List<Position>(capacity: 200);
+    Field = new List<Position>();
   }
 
   public void Add(IEnumerable<Position> positions) => 

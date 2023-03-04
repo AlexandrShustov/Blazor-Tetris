@@ -20,4 +20,5 @@ public class Client
   public string OpponentScored { get; set; } = "OpponentScored";
   public string GameOver { get; set; } = "GameOver";
   public string AcceptPlayAgain { get; set; } = "AcceptPlayAgain";
+  public string OpponentHasDisconnected { get; set; } = "OpponentHasDisconnected";
 }

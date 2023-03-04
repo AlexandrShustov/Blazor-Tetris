@@ -30,9 +30,20 @@
   </MudGrid>
 </MudContainer>
 
+<MudMessageBox @ref="_disconnect" Title="Warning">
+  <MessageContent>
+    You opponent has left the game.
+  </MessageContent>
+  <YesButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Home">Home</MudButton>
+  </YesButton>
+</MudMessageBox>
+
 @code {
   [Parameter]
   public string Id { get; set; }
+
+  MudMessageBox _disconnect;
 
   private HubConnection? _hubConnection;
 
@@ -55,10 +66,10 @@
     _localGame.GameOver += async () => await OnGameOver();
     _localGame.GameLevel = new OnlineGameLevel();
 
-    _gameUpdate = new Update(_gameDto.Id);
+    _gameUpdate = new Update();
 
     _hubConnection = new HubConnectionBuilder()
-      .WithUrl(_navigation.ToAbsoluteUri("/gamehub"))
+      .WithUrl(_navigation.ToAbsoluteUri($"/gamehub?gameId={_gameDto.Id}"))
       .Build();
 
     _hubConnection.On<Guid>(Method.Client.GameJoined, OnGameJoined);
@@ -66,16 +77,23 @@
     _hubConnection.On<Guid>(Method.Client.Start, OnStart);
     _hubConnection.On<Update>(Method.Client.HandleUpdate, HandleUpdate);
     _hubConnection.On<OnlineGameResult>(Method.Client.GameOver, OnOpponentGameOver);
+    _hubConnection.On(Method.Client.OpponentHasDisconnected, OnOpponentHasDisconnected);
 
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync(Method.JoinGame, _gameDto.Id);
 
     _timer.Elapsed += async (_, _) => await OnUpdate();
+
+    _navigation.LocationChanged += async (x, y) =>
+    {
+      _localGame.Stop();
+      await _hubConnection.DisposeAsync();
+    };
   }
 
   private async Task OnScoreUpdated()
   {
-    var update = new Update(_gameDto!.Id);
+    var update = new Update();
     update.SetLevel(_localGame.Level);
 
     await _hubConnection!.SendAsync(Method.ScoreUpdated, _gameUpdate);
@@ -138,10 +156,7 @@
     _localGame.Stop();
 
     await OnUpdate();
-    await _hubConnection!.SendAsync(Method.GameOver, new Update()
-      {
-        GameId = _gameDto.Id,
-      });
+    await _hubConnection!.SendAsync(Method.GameOver, new Update());
   }
 
   private void HandleUpdate(Update obj)
@@ -169,5 +184,12 @@
     var dialogResponse = await dialog.Result;
     if (!dialogResponse.Canceled)
       await _hubConnection!.SendAsync(Method.Ready, _gameDto!.Id);
+  }
+
+  private async Task OnOpponentHasDisconnected()
+  {
+    _localGame.Stop();
+
+    await _disconnect.Show();
   }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Tetris.Blazor.Server.Entities;
+using Tetris.Blazor.Server.Extensions;
 using Tetris.Blazor.Shared.Entities;
 using Tetris.Blazor.Shared.SignalR;
 
@@ -63,7 +64,11 @@ public class GameHub : Hub
 
   public async Task Update(Update? update)
   {
-    var game = await _storage.OneBy(update!.GameId);
+    var result = Context.GetHttpContext()!.GameIdOrDefault();
+    if (result.IsFailed)
+      return;
+
+    var game = await _storage.OneBy(result.Value);
     if (game?.PlayerWith(Context.ConnectionId) is null)
       return;
 
@@ -73,7 +78,11 @@ public class GameHub : Hub
 
   public async Task ScoreUpdated(Update update)
   {
-    var game = await _storage.OneBy(update.GameId);
+    var result = Context.GetHttpContext()!.GameIdOrDefault();
+    if (result.IsFailed)
+      return;
+
+    var game = await _storage.OneBy(result.Value);
     if (game is null)
       return;
 
@@ -83,13 +92,17 @@ public class GameHub : Hub
 
   public async Task GameOver(Update update)
   {
-    var game = await _storage.OneBy(update!.GameId);
+    var result = Context.GetHttpContext()!.GameIdOrDefault();
+    if (result.IsFailed)
+      return;
+
+    var game = await _storage.OneBy(result.Value);
     if (game == null)
       return;
 
     game.ResetReadyStatus();
 
-    var result = new OnlineGameResult
+    var gameResult = new OnlineGameResult
     {
       IsVictory = true
     };
@@ -98,7 +111,25 @@ public class GameHub : Hub
 
     await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.GameOver, result);
 
-    result.IsVictory = false;
+    gameResult.IsVictory = false;
     await Clients.Client(Context.ConnectionId).SendAsync(Method.Client.GameOver, result);
+  }
+
+  public override async Task OnDisconnectedAsync(Exception? exception)
+  {
+    var result = Context.GetHttpContext()!.GameIdOrDefault();
+
+    var gameId = result.IsSuccess 
+      ? result.Value 
+      : (Guid?) null;
+
+    if (result.IsFailed)
+      return;
+
+    var game = await _storage.OneBy(result.Value);
+    var opponent = game.OpponentOf(Context.ConnectionId);
+
+    await Clients.Client(opponent.ConnectionId).SendAsync(Method.Client.OpponentHasDisconnected);
+    return;
   }
 }

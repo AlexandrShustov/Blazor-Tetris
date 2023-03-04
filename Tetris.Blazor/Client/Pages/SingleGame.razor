@@ -29,6 +29,11 @@
     _game = new Game();
     _game.ScoreUpdated += StateHasChanged;
     _game.GameOver += async () => await ShowGameOverDialog();
+
+    _navigation.LocationChanged += (x, y) =>
+    {
+      _game.Stop();
+    };
   }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -55,7 +60,7 @@
     if (result.Canceled)
     {
       _navigation.NavigateTo("/");
-    }  
+    }
     else
     {
       Start();
