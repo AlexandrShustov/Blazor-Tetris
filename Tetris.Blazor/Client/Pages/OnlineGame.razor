@@ -15,17 +15,17 @@
   <MudGrid Justify="Justify.Center" Class="my-3">
 
     <MudItem Class="d-flex flex-column align-items-center" xs="5">
-      <MudPaper Elevation="0" Class="px-3 py-1 mb-1">
-        <MudText Typo="Typo.body2">Level: @_localGame.Level</MudText>
-      </MudPaper>
-      <GameView Game="@_localGame"></GameView>
+      <div class="d-flex flex-column">
+        <GameScoreBar Game="@_localGame"></GameScoreBar>
+        <GameView Game="@_localGame"></GameView>
+      </div>
     </MudItem>
 
     <MudItem Class="d-flex flex-column align-items-center" xs="5">
-      <MudPaper Elevation="0" Class="px-3 py-1 mb-1">
-        <MudText Typo="Typo.body2">Level: @_remoteGame.Level</MudText>
-      </MudPaper>
-      <GameView Game="@_remoteGame"></GameView>
+      <div class="d-flex flex-column">
+        <GameScoreBar Game="@_remoteGame"></GameScoreBar>
+        <GameView Game="@_remoteGame"></GameView>
+      </div>
     </MudItem>
 
   </MudGrid>

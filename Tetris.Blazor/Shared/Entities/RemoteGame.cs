@@ -5,7 +5,7 @@ namespace Tetris.Blazor.Shared.Entities;
 public class RemoteGame : IRemoteGame
 {
   public int Score { get; set; }
-  public int Level { get; set; }
+  public int Level { get; set; } = 1;
   public event Action? Updated;
 
   private readonly Cell[][] _grid;
@@ -52,7 +52,7 @@ public class RemoteGame : IRemoteGame
     }
 
     Score = update.Score;
-    Level = update.Level;
+    Level = Math.Max(1, update.Level);
 
     Updated?.Invoke();
   }
