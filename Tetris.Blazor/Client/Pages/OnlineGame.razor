@@ -5,6 +5,7 @@
 @using Tetris.Blazor.Shared.SignalR
 @using System.Timers
 @using Position = Tetris.Blazor.Shared.Entities.Position
+@implements IDisposable
 
 @inject HttpClient _httpClient
 @inject NavigationManager _navigation
@@ -30,20 +31,9 @@
   </MudGrid>
 </MudContainer>
 
-<MudMessageBox @ref="_disconnect" Title="Warning">
-  <MessageContent>
-    You opponent has left the game.
-  </MessageContent>
-  <YesButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Home">Home</MudButton>
-  </YesButton>
-</MudMessageBox>
-
 @code {
   [Parameter]
   public string Id { get; set; }
-
-  MudMessageBox _disconnect;
 
   private HubConnection? _hubConnection;
 
@@ -52,7 +42,7 @@
 
   private Update? _gameUpdate;
 
-  private readonly Timer _timer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
+  private readonly Timer _updatesTimer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
 
   private GameDto? _gameDto;
 
@@ -82,7 +72,7 @@
     await _hubConnection.StartAsync();
     await _hubConnection.SendAsync(Method.JoinGame, _gameDto.Id);
 
-    _timer.Elapsed += async (_, _) => await OnUpdate();
+    _updatesTimer.Elapsed += async (_, _) => await OnUpdate();
 
     _navigation.LocationChanged += async (x, y) =>
     {
@@ -127,7 +117,7 @@
       return;
 
     _localGame.Start();
-    _timer.Start();
+    _updatesTimer.Start();
 
     StateHasChanged();
   }
@@ -190,6 +180,32 @@
   {
     _localGame.Stop();
 
-    await _disconnect.Show();
+    var options = new DialogOptions
+      {
+        CloseOnEscapeKey = false,
+        DisableBackdropClick = true,
+        CloseButton = false,
+        Position = DialogPosition.Center,
+      };
+
+    var dialog = await _dialogs.ShowAsync<ConnectionLostDialog>("Connection lost", options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled)
+      _navigation.NavigateTo("/");
+  }
+
+  public void Dispose()
+  {
+    try 
+    {
+      _updatesTimer.Dispose();
+      _localGame.Stop();
+      _hubConnection?.StopAsync();
+    }
+    catch
+    {
+      _hubConnection?.DisposeAsync().GetAwaiter().GetResult();
+    }
   }
 }
