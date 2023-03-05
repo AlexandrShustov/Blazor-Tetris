@@ -29,6 +29,13 @@
     </MudItem>
 
   </MudGrid>
+
+  <MudOverlay @bind-Visible="@_showWaitingOverlay" LightBackground="true">
+    <div class="d-flex flex-column align-items-center">
+      <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+      <MudText Typo="Typo.body1" Color="Color.Primary">Please wait for your opponent...</MudText>
+    </div>
+  </MudOverlay>
 </MudContainer>
 
 @code {
@@ -45,6 +52,8 @@
   private readonly Timer _updatesTimer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
 
   private GameDto? _gameDto;
+
+  private bool _showWaitingOverlay;
 
   protected override async Task OnInitializedAsync()
   {
@@ -65,8 +74,8 @@
     _hubConnection.On<Guid>(Method.Client.GameJoined, OnGameJoined);
     _hubConnection.On<Guid>(Method.Client.GetReady, OnGetReady);
     _hubConnection.On<Guid>(Method.Client.Start, OnStart);
-    _hubConnection.On<Update>(Method.Client.HandleUpdate, HandleUpdate);
-    _hubConnection.On<OnlineGameResult>(Method.Client.GameOver, OnOpponentGameOver);
+    _hubConnection.On<Update>(Method.Client.HandleUpdate, OnUpdateReceived);
+    _hubConnection.On<OnlineGameResult>(Method.Client.GameOver, OnGameOver);
     _hubConnection.On(Method.Client.OpponentHasDisconnected, OnOpponentHasDisconnected);
 
     await _hubConnection.StartAsync();
@@ -91,30 +100,27 @@
 
   private async Task OnGetReady(Guid gameId)
   {
-    if (_gameDto!.Id == gameId)
+    _showWaitingOverlay = false;
+
+    var dialog = await _dialogs.ShowAsync<GetReadyDialog>();
+    var result = await dialog.Result;
+    if ((bool)(result.Data))
     {
-      var dialog = await _dialogs.ShowAsync<GetReadyDialog>();
-      var result = await dialog.Result;
-      if ((bool)(result.Data))
-      {
-        await _hubConnection!.SendAsync(Method.Ready, _gameDto.Id);
-        StateHasChanged();
-      }
+      await _hubConnection!.SendAsync(Method.Ready, _gameDto.Id);
+      StateHasChanged();
+      _showWaitingOverlay = true;
     }
   }
 
-  private void OnGameJoined(Guid gameId)
+  private async Task OnGameJoined(Guid gameId)
   {
-    if (_gameDto!.Id == gameId)
-    {
-      StateHasChanged();
-    }
+    _showWaitingOverlay = true;
+    StateHasChanged();
   }
 
   private void OnStart(Guid arg)
   {
-    if (_gameDto!.Id != arg)
-      return;
+    _showWaitingOverlay = false;
 
     _localGame.Start();
     _updatesTimer.Start();
@@ -149,7 +155,7 @@
     await _hubConnection!.SendAsync(Method.GameOver, new Update());
   }
 
-  private void HandleUpdate(Update obj)
+  private void OnUpdateReceived(Update obj)
   {
     _remoteGame.HandleUpdate(obj);
     _localGame.GameLevel.Update(obj.Score);
@@ -157,7 +163,7 @@
     StateHasChanged();
   }
 
-  private async Task OnOpponentGameOver(OnlineGameResult result)
+  private async Task OnGameOver(OnlineGameResult result)
   {
     _localGame.Stop();
 
@@ -173,7 +179,14 @@
 
     var dialogResponse = await dialog.Result;
     if (!dialogResponse.Canceled)
+    {
       await _hubConnection!.SendAsync(Method.Ready, _gameDto!.Id);
+      _showWaitingOverlay = true;
+    }
+    else
+    {
+      _navigation.NavigateTo("/");
+    }
   }
 
   private async Task OnOpponentHasDisconnected()

@@ -109,10 +109,10 @@ public class GameHub : Hub
 
     var opponent = game.OpponentOf(Context.ConnectionId);
 
-    await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.GameOver, result);
+    await Clients.Client(opponent!.ConnectionId).SendAsync(Method.Client.GameOver, gameResult);
 
     gameResult.IsVictory = false;
-    await Clients.Client(Context.ConnectionId).SendAsync(Method.Client.GameOver, result);
+    await Clients.Client(Context.ConnectionId).SendAsync(Method.Client.GameOver, gameResult);
   }
 
   public override async Task OnDisconnectedAsync(Exception? exception)

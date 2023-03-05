@@ -1,0 +1,16 @@
+﻿<MudDialog>
+  <DialogContent>
+    <MudContainer>
+      <MudText Typo="Typo.body1"
+               Color="Color.Secondary">
+        Waiting for your opponent to join...
+      </MudText>
+      <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-3" />
+    </MudContainer>
+  </DialogContent>
+</MudDialog>
+
+@code {
+  [CascadingParameter]
+  MudDialogInstance MudDialog { get; set; }
+}
