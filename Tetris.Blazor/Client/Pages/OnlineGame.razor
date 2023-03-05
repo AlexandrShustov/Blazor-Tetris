@@ -21,6 +21,29 @@
       </div>
     </MudItem>
 
+    <MudItem xs="2">
+      <MudText Color="@Color.Primary"
+               Align="@Align.Center"
+               Class="px-3 py-1 mb-1" 
+               Typo="Typo.body2">Game log</MudText>
+
+      <MudList Dense="true" 
+               Style="max-height:40em; overflow-y:scroll"
+               DisablePadding="true">
+        @foreach (var e in _events.Reverse<GameEvent>())
+        {
+          <MudListItem IconColor="@(e.IsPositive ? Color.Primary : Color.Secondary)"
+                     Dense="true" 
+                     Icon="@(e.IsPositive ? GoodEffectAvatar : BadEffectAvatar)"
+                     IconSize="@(Size.Small)">
+            <MudText Align="@(Align.Right)" Color="@(e.IsPositive ? Color.Primary : Color.Secondary)">
+              @(e.IsPositive ? "+" : "-") @e.Value
+            </MudText>
+          </MudListItem>
+        }
+      </MudList>
+    </MudItem>
+
     <MudItem Class="d-flex flex-column align-items-center" xs="5">
       <div class="d-flex flex-column">
         <GameScoreBar Game="@_remoteGame"></GameScoreBar>
@@ -52,8 +75,12 @@
   private readonly Timer _updatesTimer = new Timer(TimeSpan.FromMilliseconds(50).TotalMilliseconds);
 
   private GameDto? _gameDto;
+  private List<GameEvent> _events = new List<GameEvent>();
 
   private bool _showWaitingOverlay;
+
+  private string BadEffectAvatar = Icons.Filled.ArrowBack;
+  private string GoodEffectAvatar = Icons.Filled.ArrowForward;
 
   protected override async Task OnInitializedAsync()
   {
@@ -61,7 +88,7 @@
     if (_gameDto is not { })
       return;
 
-    _localGame.ScoreUpdated += async () => await OnScoreUpdated();
+    _localGame.ScoreUpdated += async (diff) => await OnScoreUpdated(diff);
     _localGame.GameOver += async () => await OnGameOver();
     _localGame.GameLevel = new OnlineGameLevel();
 
@@ -90,12 +117,18 @@
     };
   }
 
-  private async Task OnScoreUpdated()
+  private async Task OnScoreUpdated(int diff)
   {
     var update = new Update();
-    update.SetLevel(_localGame.Level);
+    update.SetScore(diff);
 
-    await _hubConnection!.SendAsync(Method.ScoreUpdated, _gameUpdate);
+    await _hubConnection!.SendAsync(Method.ScoreUpdated, update);
+
+    _events.Add(new GameEvent() 
+    {
+      IsPositive = true,
+      Value = diff 
+    });
   }
 
   private async Task OnGetReady(Guid gameId)
@@ -122,6 +155,7 @@
   {
     _showWaitingOverlay = false;
 
+    _events.Clear();
     _localGame.Start();
     _updatesTimer.Start();
 
@@ -133,7 +167,6 @@
     _gameUpdate!.Reset();
     _gameUpdate.Add(EmptyPositions());
     _gameUpdate.SetLevel(_localGame.Level);
-    _gameUpdate.SetScore(_localGame.Score);
 
     await _hubConnection!.SendAsync(Method.Update, _gameUpdate);
 
@@ -160,6 +193,15 @@
     _remoteGame.HandleUpdate(obj);
     _localGame.GameLevel.Update(obj.Score);
 
+    if (obj.Score > 0)
+    {
+      _events.Add(new GameEvent()
+        {
+          IsPositive = false,
+          Value = obj.Score
+        });
+    }
+
     StateHasChanged();
   }
 
@@ -174,7 +216,7 @@
       {
         CloseButton = false,
         CloseOnEscapeKey = false,
-        Position = DialogPosition.Center
+        Position = DialogPosition.Center,
       });
 
     var dialogResponse = await dialog.Result;

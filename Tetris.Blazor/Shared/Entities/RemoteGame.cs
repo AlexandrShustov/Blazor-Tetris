@@ -38,21 +38,24 @@ public class RemoteGame : IRemoteGame
 
   public void HandleUpdate(Update update)
   {
-    var set = update.Field.ToHashSet();
-
-    for (var i = 0; i < _rowCount; i++)
-    for (var j = 0; j < _columnCount; j++)
+    if (update.Field?.Any() == true)
     {
-      var cell = _grid[i][j];
+      var set = update.Field.ToHashSet();
 
-      if (!set.Contains(cell.Position))
-        cell.Release();
-      else if (cell.State == State.Empty)
-        cell.Occupy(_defaultFigure);
+      for (var i = 0; i < _rowCount; i++)
+        for (var j = 0; j < _columnCount; j++)
+        {
+          var cell = _grid[i][j];
+
+          if (!set.Contains(cell.Position))
+            cell.Release();
+          else if (cell.State == State.Empty)
+            cell.Occupy(_defaultFigure);
+        }
     }
 
-    Score = update.Score;
-    Level = Math.Max(1, update.Level);
+    Score += update.Score;
+    Level = Math.Max(update.Level, Level);
 
     Updated?.Invoke();
   }

@@ -27,7 +27,7 @@
   protected override async Task OnInitializedAsync()
   {
     _game = new Game();
-    _game.ScoreUpdated += StateHasChanged;
+    _game.ScoreUpdated += (x) =>  StateHasChanged();
     _game.GameOver += async () => await ShowGameOverDialog();
 
     _navigation.LocationChanged += (x, y) =>

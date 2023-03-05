@@ -7,9 +7,14 @@ public class OnlineGameLevel : IGameLevel
   private const int Default = 1;
   private int _level = Default;
 
+  private int _currentScore = 0;
+
   public void Update(int newValue)
   {
-    _level = Math.Max(1, newValue / 2);
+    if (newValue > 0)
+      _currentScore += newValue;
+
+    _level = Math.Max(1, _currentScore / 2);
   }
 
   public void Reset()

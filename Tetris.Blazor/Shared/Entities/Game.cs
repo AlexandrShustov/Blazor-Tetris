@@ -9,7 +9,7 @@ public class Game : ILocalGame
   
   public event Action Updated;
 
-  public event Action ScoreUpdated;
+  public event Action<int> ScoreUpdated;
   public event Action GameOver;
 
   public int Level => GameLevel.CurrentLevel;
@@ -35,8 +35,10 @@ public class Game : ILocalGame
     get => _score;
     set
     {
+      var old = _score;
       _score = value;
-      ScoreUpdated?.Invoke();
+
+      ScoreUpdated?.Invoke(_score - old);
     }
   }
 

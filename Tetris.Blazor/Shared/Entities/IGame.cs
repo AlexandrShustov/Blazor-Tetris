@@ -15,7 +15,7 @@ public interface ILocalGame : IGame
 {
   IGameLevel GameLevel { get; set; }
 
-  event Action ScoreUpdated;
+  event Action<int> ScoreUpdated;
   event Action GameOver;
   void HandleInput(string key);
   void Start();

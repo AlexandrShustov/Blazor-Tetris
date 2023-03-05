@@ -10,7 +10,7 @@ public class OfflineGameLevel : IGameLevel
   public OfflineGameLevel(Game game)
   {
     SetDefaults();
-    game.ScoreUpdated += () => Update(game.Score);
+    game.ScoreUpdated += (x) => Update(game.Score);
   }
 
   public void Update(int newValue)
