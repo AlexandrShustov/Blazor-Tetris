@@ -129,7 +129,10 @@ public class GameHub : Hub
     var game = await _storage.OneBy(result.Value);
     var opponent = game.OpponentOf(Context.ConnectionId);
 
-    await Clients.Client(opponent.ConnectionId).SendAsync(Method.Client.OpponentHasDisconnected);
+    if (opponent != null)
+      await Clients.Client(opponent.ConnectionId)
+        .SendAsync(Method.Client.OpponentHasDisconnected);
+
     return;
   }
 }

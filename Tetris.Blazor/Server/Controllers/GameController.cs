@@ -43,7 +43,7 @@ public class GameController : ControllerBase
   {
     var all = await _gameStorage.All();
 
-    return Ok(all.Select(Map));
+    return Ok(all.Where(x => !x.IsPrivate).Select(Map));
 
     GameDto Map(Game game) => new()
     {
