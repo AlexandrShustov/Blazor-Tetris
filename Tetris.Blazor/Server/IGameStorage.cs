@@ -6,7 +6,7 @@ namespace Tetris.Blazor.Server;
 public interface IGameStorage
 {
   Task<Game?> Create(Game game);
-  Task<IEnumerable<Game>> All();
+  Task<IEnumerable<Game>> OpenedGames();
   Task<Game?> OneBy(Guid id);
 }
 
@@ -28,13 +28,14 @@ public class GameStorage : IGameStorage
     return Task.FromResult<Game?>(game);
   }
 
-  public Task<IEnumerable<Game>> All()
+  public Task<IEnumerable<Game>> OpenedGames()
   {
-    var waitingGames = _games.Values
+    var openAvailableGames = _games.Values
+      .Where(x => !x.IsPrivate)
       .Where(x => x.State == GameState.Waiting)
       .ToList();
 
-    return Task.FromResult(waitingGames as IEnumerable<Game>);
+    return Task.FromResult(openAvailableGames as IEnumerable<Game>);
   }
 
   public Task<Game?> OneBy(Guid id)

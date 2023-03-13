@@ -54,7 +54,7 @@
 
   private async Task FetchGames()
   {
-    var games = await _httpClient.GetFromJsonAsync<GameDto[]>("/api/game/all");
+    var games = await _httpClient.GetFromJsonAsync<GameDto[]>("api/games/opened");
     _games = games?.ToList() ?? new List<GameDto>();
   }
 
@@ -72,7 +72,7 @@
     var result = await dialog.Result;
     if (result?.Data is NewGameDto obj)
     {
-      var response = await _httpClient.PostAsJsonAsync("api/game/create", obj);
+      var response = await _httpClient.PostAsJsonAsync("api/games", obj);
       if (response.IsSuccessStatusCode is false)
       {
         _error = $"{response.StatusCode}: {response.ReasonPhrase}";
