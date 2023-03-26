@@ -9,3 +9,6 @@ To try just clone the repo and launch it localy, or open the root of the repo in
 ([according to the Microsoft guide about running a image over https](https://learn.microsoft.com/en-us/aspnet/core/security/docker-https?view=aspnetcore-7.0#windows-using-linux-containers)). It is not going to work if you don't configure your secrets and a dev certificate.
 
 Stuff used: SignalR, MudBlazor, a bit of Bootsrap, ASP.NET Core 6, poor CSS knowledge
+
+![image](https://user-images.githubusercontent.com/25985600/227798535-ee710bdc-3dc9-41a3-814d-9d53485fdcf2.png)
+
