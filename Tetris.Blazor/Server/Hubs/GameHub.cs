@@ -35,8 +35,7 @@ public class GameHub : Hub
       return;
     }
 
-    await Clients
-      .Caller
+    await Clients.Caller
       .SendAsync(Method.Client.GameJoined, game.Id);
   }
 

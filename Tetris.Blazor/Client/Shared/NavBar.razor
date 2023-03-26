@@ -2,15 +2,9 @@
 
 <MudStack Justify="Justify.Center" Row="true" Style="margin: 0px;">
   <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => Home()">Home</MudButton>
-  <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => Leaders()">Leaders</MudButton>
 </MudStack>
 
 @code {
-  private void Leaders()
-  {
-    _navigation.NavigateTo("/leaders");
-  }
-
   private void Home()
   {
     _navigation.NavigateTo("/");
